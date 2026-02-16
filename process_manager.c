@@ -27,7 +27,6 @@ int run_basic_demo(void) {
         producer_process(pipe_fd[1],1);
     }else{
         printf("Created producer child (PID: %d)\n", producer_pid);
-        fflush(stdout);
     }
 
     consumer_pid = fork();
@@ -41,7 +40,6 @@ int run_basic_demo(void) {
         consumer_process(pipe_fd[0],0);
     }else{
         printf("Created consumer child (PID: %d)\n", consumer_pid);
-        fflush(stdout);
     }
     
     printf("\n");
@@ -114,7 +112,6 @@ int run_multiple_pairs(int num_pairs) {
  */
 void producer_process(int write_fd, int start_num) {
     printf("Producer (PID: %d) starting...\n", getpid());
-    fflush(stdout);
     
     // Send 5 numbers: start_num, start_num+1, start_num+2, start_num+3, start_num+4
     for (int i = 0; i < NUM_VALUES; i++) {
@@ -126,12 +123,10 @@ void producer_process(int write_fd, int start_num) {
         }
         
         printf("Producer: Sent number %d\n", number);
-        fflush(stdout);
         usleep(100000); // Small delay to see output clearly
     }
     
     printf("Producer: Finished sending %d numbers\n", NUM_VALUES);
-    fflush(stdout);
     close(write_fd);
     exit(0);
 }
@@ -145,18 +140,15 @@ void consumer_process(int read_fd, int pair_id) {
     int sum = 0;
     
     printf("Consumer (PID: %d) starting...\n", getpid());
-    fflush(stdout);
     
     // Read numbers until pipe is closed
     while (read(read_fd, &number, sizeof(number)) > 0) {
         count++;
         sum += number;
         printf("Consumer: Received %d, running sum: %d\n", number, sum);
-        fflush(stdout);
     }
     
     printf("Consumer: Final sum: %d\n", sum);
-    fflush(stdout);
     close(read_fd);
     exit(0);
 }
