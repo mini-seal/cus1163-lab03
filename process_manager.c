@@ -10,7 +10,6 @@ int run_basic_demo(void) {
     int status;
     
     printf("\nParent process (PID: %d) creating children...\n", getpid());
-    fflush(stdout);
     
     if (pipe(pipe_fd) == -1) {
          perror("pipe failed");
@@ -25,10 +24,9 @@ int run_basic_demo(void) {
 
     if(producer_pid == 0){
         close(pipe_fd[0]); //Close read end
-        producer_process(pipe_fd[1],1);
-    }else{
         printf("Created producer child (PID: %d)\n", producer_pid);
-        fflush(stdout);
+        producer_process(pipe_fd[1],1);
+        exit(0);
     }
 
     consumer_pid = fork();
@@ -39,10 +37,9 @@ int run_basic_demo(void) {
 
     if(consumer_pid == 0){
         close(pipe_fd[1]); 
-        consumer_process(pipe_fd[0],0);
-    }else{
         printf("Created consumer child (PID: %d)\n", consumer_pid);
-        fflush(stdout);
+        consumer_process(pipe_fd[0],0);
+        exit(0);
     }
     
     printf("\n");
@@ -53,11 +50,9 @@ int run_basic_demo(void) {
     
     pid_t child_pid = waitpid(producer_pid, &status, 0);
     printf("Producer child (PID: %d) exited with status %d\n", child_pid, WEXITSTATUS(status));
-    fflush(stdout);
-
+    
     child_pid = waitpid(consumer_pid, &status, 0);
     printf("Consumer child (PID: %d) exited with status %d\n", child_pid, WEXITSTATUS(status));
-    fflush(stdout);
     
     return 0;
 }
@@ -71,7 +66,6 @@ int run_multiple_pairs(int num_pairs) {
     int pid_count = 0;
     int status;
     printf("\nParent creating %d producer-consumer pairs...\n", num_pairs);
-    fflush(stdout);
     
     for (int i = 0; i < num_pairs; i++){
         int pipe_fd[2];
@@ -81,7 +75,6 @@ int run_multiple_pairs(int num_pairs) {
         }
 
         printf("\n=== Pair %d ===\n", i+1);
-        fflush(stdout);
         
         pid_t producer_pid = fork();
         if(producer_pid == 0){
@@ -108,7 +101,6 @@ int run_multiple_pairs(int num_pairs) {
     for(int i=0; i<pid_count; i++){
         pid_t child_pid = waitpid(pids[i], &status, 0);
         printf("Child %d exited with status %d\n", child_pid, WEXITSTATUS(status));
-        fflush(stdout);
     }
     printf("\nAll pairs completed successfully!\n");
     return 0;
@@ -119,7 +111,6 @@ int run_multiple_pairs(int num_pairs) {
  */
 void producer_process(int write_fd, int start_num) {
     printf("Producer (PID: %d) starting...\n", getpid());
-    fflush(stdout);
     
     // Send 5 numbers: start_num, start_num+1, start_num+2, start_num+3, start_num+4
     for (int i = 0; i < NUM_VALUES; i++) {
@@ -131,12 +122,10 @@ void producer_process(int write_fd, int start_num) {
         }
         
         printf("Producer: Sent number %d\n", number);
-        fflush(stdout);
         usleep(100000); // Small delay to see output clearly
     }
     
     printf("Producer: Finished sending %d numbers\n", NUM_VALUES);
-    fflush(stdout);
     close(write_fd);
     exit(0);
 }
@@ -150,18 +139,15 @@ void consumer_process(int read_fd, int pair_id) {
     int sum = 0;
     
     printf("Consumer (PID: %d) starting...\n", getpid());
-    fflush(stdout);
     
     // Read numbers until pipe is closed
     while (read(read_fd, &number, sizeof(number)) > 0) {
         count++;
         sum += number;
         printf("Consumer: Received %d, running sum: %d\n", number, sum);
-        fflush(stdout);
     }
     
     printf("Consumer: Final sum: %d\n", sum);
-    fflush(stdout);
     close(read_fd);
     exit(0);
 }
