@@ -64,7 +64,7 @@ int run_basic_demo(void) {
 int run_multiple_pairs(int num_pairs) {
     pid_t pids[10]; // Store all child PIDs
     int pid_count = 0;
-
+    int status;
     printf("\nParent creating %d producer-consumer pairs...\n", num_pairs);
 
     for (int i = 0; i < num_pairs; i++){
@@ -96,14 +96,16 @@ int run_multiple_pairs(int num_pairs) {
         
         close(pipe_fd[0]);
         close(pipe_fd[1]);
+        waitpid(pids[i], &status, 0);
     }
 
-    int status;
+    
+    printf("\nAll pairs completed successfully!\n");
+
     for(int i=0; i<pid_count; i++){
         pid_t child_pid = waitpid(pids[i], &status, 0);
         printf("Child %d exited with status %d\n", child_pid, WEXITSTATUS(status));
     }
-    printf("\nAll pairs completed successfully!\n");
     return 0;
 }
 
