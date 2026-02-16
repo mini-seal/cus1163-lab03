@@ -94,15 +94,14 @@ int run_multiple_pairs(int num_pairs) {
         
         close(pipe_fd[0]);
         close(pipe_fd[1]);
+
+        int status;
+        for(int i=0; i<pid_count; i++){
+            pid_t child_pid = waitpid(pids[i], &status, 0);
+            printf("Child %d exited with status %d\n", child_pid, WEXITSTATUS(status));
+        }
     }
 
-    
-    int status;
-    for(int i=0; i<pid_count; i++){
-        pid_t child_pid = waitpid(pids[i], &status, 0);
-        printf("Child %d exited with status %d\n", child_pid, WEXITSTATUS(status));
-    }
-    
     printf("\nAll pairs completed successfully!\n");
     return 0;
 }
