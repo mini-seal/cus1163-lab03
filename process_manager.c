@@ -27,6 +27,7 @@ int run_basic_demo(void) {
         producer_process(pipe_fd[1],1);
     }else{
         printf("Created producer child (PID: %d)\n", producer_pid);
+        fflush(stdout);
     }
 
     consumer_pid = fork();
@@ -40,16 +41,18 @@ int run_basic_demo(void) {
         consumer_process(pipe_fd[0],0);
     }else{
         printf("Created consumer child (PID: %d)\n", consumer_pid);
+        fflush(stdout);
     }
-
+    
+    printf("\n");
     close(pipe_fd[0]); 
     close(pipe_fd[1]);
     
     pid_t child_pid = waitpid(producer_pid, &status, 0);
-    printf("Child %d exited with status %d\n", child_pid, status);
+    printf("Producer child (PID: %d) exited with status %d\n", child_pid, status);
 
     child_pid = waitpid(consumer_pid, &status, 0);
-    printf("Child %d exited with status %d\n", child_pid, status);
+    printf("Consumer child (PID: %d) exited with status %d\n", child_pid, status);
     
     return 0;
 }
@@ -72,6 +75,7 @@ int run_multiple_pairs(int num_pairs) {
         }
 
         printf("\n=== Pair %d ===\n", i+1);
+        fflush(stdout);
         
         pid_t producer_pid = fork();
         if(producer_pid == 0){
@@ -88,18 +92,19 @@ int run_multiple_pairs(int num_pairs) {
         }else{
             pids[pid_count++] = consumer_pid;
         }
-
+        
         close(pipe_fd[0]);
         close(pipe_fd[1]);
     }
-    
+        
+    printf("\nAll pairs completed successfully!\n");
+
     int status;
     for(int i=0; i<pid_count; i++){
         pid_t child_pid = waitpid(pids[i], &status, 0);
         printf("Child %d exited with status %d\n", child_pid, status);
     }
     
-    printf("\nAll pairs completed successfully!\n");
     return 0;
 }
 
