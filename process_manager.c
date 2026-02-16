@@ -80,6 +80,7 @@ int run_multiple_pairs(int num_pairs) {
         if(producer_pid == 0){
             close(pipe_fd[0]); 
             producer_process(pipe_fd[1],  i*5+1);
+            exit(0);
         }else{
             pids[pid_count++] = producer_pid;
         }
@@ -88,20 +89,20 @@ int run_multiple_pairs(int num_pairs) {
         if(consumer_pid == 0){
             close(pipe_fd[1]); 
             consumer_process(pipe_fd[0],  i+1);
+            exit(0);
         }else{
             pids[pid_count++] = consumer_pid;
         }
         
         close(pipe_fd[0]);
         close(pipe_fd[1]);
-
-        int status;
-        for(int i=0; i<pid_count; i++){
-            pid_t child_pid = waitpid(pids[i], &status, 0);
-            printf("Child %d exited with status %d\n", child_pid, WEXITSTATUS(status));
-        }
     }
 
+    int status;
+    for(int i=0; i<pid_count; i++){
+        pid_t child_pid = waitpid(pids[i], &status, 0);
+        printf("Child %d exited with status %d\n", child_pid, WEXITSTATUS(status));
+    }
     printf("\nAll pairs completed successfully!\n");
     return 0;
 }
