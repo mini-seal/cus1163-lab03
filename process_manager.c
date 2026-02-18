@@ -67,12 +67,12 @@ int run_multiple_pairs(int num_pairs) {
     
     for (int i = 0; i < num_pairs; i++){
         int pipe_fd[2];
+        printf("\n=== Pair %d ===\n", i+1);
+
         if (pipe(pipe_fd) == -1) {
             perror("pipe failed");
             return -1;
         }
-
-        printf("\n=== Pair %d ===\n", i+1);
         
         pid_t producer_pid = fork();
         if(producer_pid == 0){
