@@ -23,11 +23,10 @@ int run_basic_demo(void) {
     }
 
     if(producer_pid == 0){
-        close(pipe_fd[0]); //Close read end
-        printf("Created producer child (PID: %d)\n", producer_pid);
+        close(pipe_fd[0]); //Close read end       
         producer_process(pipe_fd[1],1);
-        exit(0);
     }
+    printf("Created producer child (PID: %d)\n", producer_pid);
 
     consumer_pid = fork();
     if (consumer_pid == -1) {
@@ -36,11 +35,10 @@ int run_basic_demo(void) {
     }
 
     if(consumer_pid == 0){
-        close(pipe_fd[1]); 
-        printf("Created consumer child (PID: %d)\n", consumer_pid);
+        close(pipe_fd[1]);       
         consumer_process(pipe_fd[0],0);
-        exit(0);
     }
+    printf("Created consumer child (PID: %d)\n", consumer_pid);
     
     printf("\n");
     close(pipe_fd[0]); 
@@ -64,7 +62,7 @@ int run_basic_demo(void) {
 int run_multiple_pairs(int num_pairs) {
     pid_t pids[10]; // Store all child PIDs
     int pid_count = 0;
-    int status;
+   
     printf("\nParent creating %d producer-consumer pairs...\n", num_pairs);
     
     for (int i = 0; i < num_pairs; i++){
@@ -80,28 +78,27 @@ int run_multiple_pairs(int num_pairs) {
         if(producer_pid == 0){
             close(pipe_fd[0]); 
             producer_process(pipe_fd[1],  i*5+1);
-            exit(0);
-        }else{
-            pids[pid_count++] = producer_pid;
         }
 
         pid_t consumer_pid = fork();
         if(consumer_pid == 0){
             close(pipe_fd[1]); 
             consumer_process(pipe_fd[0],  i+1);
-            exit(0);
-        }else{
-            pids[pid_count++] = consumer_pid;
         }
         
         close(pipe_fd[0]);
         close(pipe_fd[1]);
+
+        pids[pid_count++] = producer_pid;
+        pids[pid_count++] = consumer_pid;
     }
 
     for(int i=0; i<pid_count; i++){
+        int status;
         pid_t child_pid = waitpid(pids[i], &status, 0);
-        printf("Child %d exited with status %d\n", child_pid, WEXITSTATUS(status));
+        printf("Child (PID: %d) exited with status %d\n", child_pid, WEXITSTATUS(status));
     }
+    
     printf("\nAll pairs completed successfully!\n");
     return 0;
 }
